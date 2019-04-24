@@ -9,6 +9,7 @@ var currentTime = 0;
 var baseSpawnTime = 1;
 var spawnTime = 1;
 
+
 // define MainMenu state & methods
 var MainMenu = function(game){};
 MainMenu.prototype = {
@@ -26,9 +27,9 @@ MainMenu.prototype = {
     game.load.image('aisle', 'assets/aisle.jpg');
     game.load.image('floor', 'assets/floor.jpg')   
     game.load.image('dorrito', 'assets/dorrito.png');
+    game.load.image('broc', 'assets/broc.png');
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
-    game.load.audio('pop01','assets/audio/pop01.mp3');
-
+ 
   },
   create: function(){
     console.log('MainMenu: create');
@@ -93,10 +94,8 @@ Play.prototype = {
     // create score tracker
     scoreText = game.add.text(16, 16, 'score: 0', {fontSize: '32px', fill: '#000'});
 
-    //make doritos
-    this.dorrito = new SnowStorm(game, 'dorrito', 4, Math.PI);
-    game.add.existing(this.dorrito);
-    this.dorrito.x = Math.random();
+
+
     
      
   },
@@ -140,42 +139,39 @@ Play.prototype = {
       // obstacle timer
     currentTime += game.time.physicsElapsed;
 
-    if (currentTime >= spawnTime)
+    if (currentTime >= spawnTime) {
+        if ((Math.random() * 101) < 50){
+            var dorrito = new SnowStorm(game, 'dorrito', 4, Math.PI);
+            game.add.existing(dorrito);
+            dorrito.x = Math.random();
+        } else {
+           var greens = new SnowStorm(game, 'broc', 4, Math.PI);
+            game.add.existing(greens);
+            greens.x = Math.random();
+        }
+    }
  
     // When player hits star remove et
 
-    function collectStar(player, star){
-      // play POP sound
-      sound = game.sound.play('pop01');
-
-      // remove star
-      star.kill();
-
-      // update scoreText
-      score += 10;
-      scoreText.text = 'Score: ' + score;
-
-      // if all stars are collected, end game.
-      if(starCollector == 0 ){
-        game.state.start('GameOver');
-      }
-    }
-
-    // When player hits diamond, remove it
-    function collectDiamond(player, diamond){
-      diamond.kill();
-      //update scoreText
-      score += 50;
-      scoreText.text = 'Score: ' + score;
-
-    }
-
+    function collectStar(player, star) {
  
 
+        // remove star
+        star.kill();
 
+        // update scoreText
+        score += 10;
+        scoreText.text = 'Score: ' + score;
 
+        // When player hits diamond, remove it
+        function collectDiamond(player, diamond) {
+            diamond.kill();
+            //update scoreText
+            score += 50;
+            scoreText.text = 'Score: ' + score;
 
-
+      }
+    }
   }
 }
 
