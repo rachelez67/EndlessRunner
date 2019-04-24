@@ -12,8 +12,7 @@ function SnowStorm(game, key, scale, rotation) {
   game.physics.enable(this);
   this.body.collideWorldBounds = false;
   this.body.angularVelocity = game.rnd.integerInRange(-150, 300);
-  this.body.velocity.x = Math.random() * Math.random()*380;
-  this.body.velocity.y = Math.random() * Math.random()*580;
+  this.body.velocity.x = 250;
 
   console.log('made');
 }
@@ -32,15 +31,5 @@ SnowStorm.prototype.update = function() {
     this.x = 0;
   } else if (this.x < 0){
     this.x = game.world.width;
-  } else if (this.y > game.world.height){
-    this.y = 0;
-  } else if (this.y < 0){
-    this.y = game.world.height;
-  }
-
-  // reverse doritos
-  if (game.input.keyboard.isDown(Phaser.Keyboard.R)){
-    this.body.velocity.x = Math.random() * -Math.random()*180;
-  }
-
+  } 
 }
