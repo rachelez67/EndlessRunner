@@ -1,13 +1,13 @@
 //define Game
-var game = new Phaser.Game(400, 600, Phaser.AUTO);
-var platforms;
+var game = new Phaser.Game(600, 600, Phaser.AUTO);
 var player;
 var score = 0;
 var scoreText;
-var villan;
-var villan2;
-var starCollector = 6;
-var sound;
+var aisle;
+var ground;
+var currentTime = 0;
+var baseSpawnTime = 1;
+var spawnTime = 1;
 
 // define MainMenu state & methods
 var MainMenu = function(game){};
@@ -19,13 +19,13 @@ MainMenu.prototype = {
   preload: function() {
     console.log('MainMenu: preload');
 
-    //preload all assets
-    game.load.image('sky', 'assets/sky.png');
-    game.load.image('ground', 'assets/platform.png');
-    game.load.image('star', 'assets/star.png');
-    game.load.image('diamond', 'assets/diamond.png');
+      //preload all assets
+
+      //nj.com (chip aisle)
+      //iconshots.com (floor)
+    game.load.image('aisle', 'assets/aisle.jpg');
+    game.load.image('floor', 'assets/floor.jpg')   
     game.load.image('dorrito', 'assets/dorrito.png');
-    game.load.spritesheet('baddie', 'assets/baddie.png', 32, 32);
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
     game.load.audio('pop01','assets/audio/pop01.mp3');
 
@@ -34,7 +34,7 @@ MainMenu.prototype = {
     console.log('MainMenu: create');
     var style = {font: "bold 32px Arial", fill:"#fff", boundsAlignH: "center",
     boundsAlignV: "middle"};
-    text1 =  game.add.text(0, 0, "StArRuN!!1!", style);
+    text1 =  game.add.text(0, 0, "StArRuN!!1", style);
     text1.setTextBounds(0, 100, 400, 0);
     text = game.add.text(0, 0, "press SPACEBAR to start", style);
     text.setTextBounds(0, 200, 400, 0);
@@ -64,26 +64,16 @@ Play.prototype = {
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
     // create background
-    game.add.sprite(0, 0, 'sky');
+    aisle = game.add.tileSprite(0, 0, 600, 300, 'aisle');
+   
 
-    // platforms
-    platforms = game.add.group();
-    platforms.enableBody = true;
 
     // create ground
-    var ground = platforms.create(0, game.world.height - 64, 'ground');
-    ground.scale.setTo(2,2);
-    ground.body.immovable = true;
+    ground = game.add.tileSprite(0, game.world.height - 300, 600, 300, 'floor');
+ 
+ 
 
-    // create legdes
-    var ledge = platforms.create(350, 100, 'ground');
-    ledge.body.immovable = true;
-    ledge = platforms.create(250, 250, 'ground');
-    ledge.body.immovable = true;
-    ledge = platforms.create(-350, 150, 'ground');
-    ledge.body.immovable = true;
-    ledge = platforms.create(-260, 380, 'ground');
-    ledge.body.immovable = true;
+ 
 
     // player and its settings
     player = game.add.sprite(32, game.world.height - 150, 'dude');
@@ -100,68 +90,44 @@ Play.prototype = {
     player.animations.add('left', [0, 1, 2, 3], 10, true);
     player.animations.add('right', [5, 6, 7, 8], 10, true);
 
-    stars = game.add.group();
-    stars.enableBody = true;
-
-    //make starbois
-    for (var i = 0; i < 12; i++)
-    {
-      var star = stars.create(i * 70, 0, 'star');
-      star.body.gravity.y = 6;
-      star.body.bounce.y = 0.7 + Math.random() * 0.2;
-    }
-
-    // create diamond and spawn at random points
-    diamonds = game.add.group();
-    diamonds.enableBody = true;
-    var diamond = diamonds.create(game.world.randomX, game.world.randomY, 'diamond');
-
-    // Create baddie 1
-    villan = game.add.sprite(32, game.world.height - 250, 'baddie');
-
-    // Baddie 1 physics
-    game.physics.arcade.enable(villan);
-    villan.animations.add('left', [0,1], 10, true);
-
-    // Create baddie 2
-    villan2 = game.add.sprite(350, game.world.width - 180, 'baddie');
-    // Baddie 2 pysics
-    game.physics.arcade.enable(villan2);
-    villan2.animations.add('right', [2,3], 10, true);
-
-
     // create score tracker
     scoreText = game.add.text(16, 16, 'score: 0', {fontSize: '32px', fill: '#000'});
 
-    //make 100 doritos
-     for (var i = 0; i < 100; i++){
-         this.dorrito = new SnowStorm(game,'dorrito', 2, Math.PI);
-         game.add.existing(this.dorrito);
-         this.dorrito.x = Math.random();
-         this.dorrito.y = Math.random();
-     }
+    //make doritos
+    this.dorrito = new SnowStorm(game, 'dorrito', 4, Math.PI);
+    game.add.existing(this.dorrito);
+    this.dorrito.x = Math.random();
+    
+     
   },
 
   // Update game loop
   update: function(){
-    //Game logic
+      //Game logic
+
+    // scroll background and ground
+
+      aisle.tilePosition.x += -2;
+      ground.tilePosition.x += -2;
+
+
     // Player collision
-    var hitPlatform = game.physics.arcade.collide(player, platforms);
+      var hitPlatform = game.physics.arcade.collide(player, ground);
 
     // Player movement
-    player.body.velocity.x = 0;
+    player.body.velocity.xy = 0;
     cursors = game.input.keyboard.createCursorKeys();
 
     if (cursors.left.isDown)
     {
-      // Player moves left
-      player.body.velocity.x = -150;
-      player.animations.play('left');
+      // Player moves up
+      player.body.velocity.y = 150;
+      player.animations.play('right');
     }
     else if (cursors.right.isDown)
     {
-      // Player moves right
-      player.body.velocity.x = 150;
+      // Player moves down
+      player.body.velocity.y = -150;
       player.animations.play('right');
     }
     else
@@ -170,12 +136,12 @@ Play.prototype = {
         player.animations.stop();
         player.frame = 4;
     }
-    // Let player jump if touching the ground
-    if (cursors.up.isDown && player.body.touching.down && hitPlatform)
-    {
-      player.body.velocity.y = -350;
-    }
 
+      // obstacle timer
+    currentTime += game.time.physicsElapsed;
+
+    if (currentTime >= spawnTime)
+ 
     // When player hits star remove et
 
     function collectStar(player, star){
@@ -184,9 +150,6 @@ Play.prototype = {
 
       // remove star
       star.kill();
-
-      //reduce star count
-      starCollector--;
 
       // update scoreText
       score += 10;
@@ -207,32 +170,10 @@ Play.prototype = {
 
     }
 
-    // When player hits Baddie, remove it
-    function killBaddie(player, villan){
-      villan.kill();
+ 
 
-      score -= 25;
-      scoreText.text = 'Score: ' + score;
-      // update game state
-      game.state.start('GameOver');
-    }
 
-    // Check star collision
-    game.physics.arcade.collide(stars, platforms);
-    game.physics.arcade.overlap(player, stars, collectStar, null, this);
 
-    //Check diamond collision
-    game.physics.arcade.overlap(player, diamonds, collectDiamond, null, this);
-
-    // Baddie 1&2 animations and physics
-    villan.animations.play('left');
-    villan2.animations.play('right');
-    game.physics.arcade.collide(villan, platforms);
-    game.physics.arcade.collide(villan2, platforms);
-
-    // Check baddie collision
-    game.physics.arcade.overlap(player, villan, killBaddie, null, this);
-    game.physics.arcade.overlap(player, villan2, killBaddie, null, this);
 
 
   }
